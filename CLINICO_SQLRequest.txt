@@ -21,7 +21,7 @@ drop table #TicketTemp
 --Create AC Ticket Sequence
 
 SELECT value as 'TicketNo' into #TicketTemp
-FROM GENERATE_SERIES(98765400, 98765449)
+FROM GENERATE_SERIES(45678900, 45678988)
 
 select 'AC-' + convert(nchar(8),TicketNo) as 'TicketNo' into #ACTicketTemp
 FROM #TicketTemp
