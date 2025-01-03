@@ -1,0 +1,71 @@
+--Create AA Ticket Sequence
+
+SELECT value as 'TicketNo' into #TicketTemp
+FROM GENERATE_SERIES(12345600, 12345649)
+
+select 'AA-' + convert(nchar(8),TicketNo) as 'TicketNo' into #AATicketTemp
+FROM #TicketTemp
+
+drop table #TicketTemp
+
+--Create AB Ticket Sequence
+
+SELECT value as 'TicketNo' into #TicketTemp
+FROM GENERATE_SERIES(98765400, 98765449)
+
+select 'AB-' + convert(nchar(8),TicketNo) as 'TicketNo' into #ABTicketTemp
+FROM #TicketTemp
+
+drop table #TicketTemp
+
+--Create AC Ticket Sequence
+
+SELECT value as 'TicketNo' into #TicketTemp
+FROM GENERATE_SERIES(98765400, 98765449)
+
+select 'AC-' + convert(nchar(8),TicketNo) as 'TicketNo' into #ACTicketTemp
+FROM #TicketTemp
+
+drop table #TicketTemp
+
+
+--Finding Missing Ticket
+
+with TotalTicket as (
+
+select * from #AATicketTemp
+union all
+select * from #ABTicketTemp
+union all
+select * from #ACTicketTemp
+
+),
+MarchInvoices as (
+select * 
+from invoices
+where created_at between '2024-03-01' and '2024-03-31'
+)
+
+select b.* into #MissingTicket
+from MarchInvoices a
+right join (select ROW_NUMBER() OVER (ORDER BY TicketNo) as 'id' ,* 
+           from TotalTicket) b on a.invoice_number = b.TicketNo
+where a.invoice_number is null
+
+-- Combine invoice_books
+
+select a.*,b.track,b.year,b.month,b.begin_number,b.end_number
+from #MissingTicket a
+join invoice_books on SUBSTRING(a.TicketNo, 2, 2) = b.track
+
+-- drop temp query
+drop table #MissingTicket
+
+
+
+
+
+
+
+
+
